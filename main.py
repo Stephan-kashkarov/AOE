@@ -2,7 +2,7 @@ import pygame as pg
 import random
 import time
 import functions as func
-import menu
+import settings
 
 class ClientGame(object):
 	def __init__(self, settings):
@@ -12,17 +12,19 @@ class ClientGame(object):
 		self.controls = settings['controls']
 		pg.init()
 		pg.mixer.init()
+		pg.font.init()
 		self.screen = pg.display.set_mode((self.screenWidth, self.screenHeight))
+		self.screen.fill((0,0,0))
 		pg.display.set_caption("AOE Clone")
 		self.clock = pg.time.Clock()
 		self.run()
 
 
 	def menu(self):
-		single = menu.Button(self, "Singleplayer", x='center', y=(self.screenHeight/2), borderColour=(191, 164, 9))
-		multi = menu.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 - 50), borderColour=(191, 164, 9))
-		settings = menu.Button(self, "Settings", x='center', y=(self.screenHeight/2 - 100), borderColour=(191, 164, 9))
-		_quit = menu.Button(self, "Quit", x='center', y=(self.screenHeight/2 - 150), borderColour=(191, 164, 9))
+		single = func.Button(self, "Singleplayer", x='center', y=(self.screenHeight/2), borderColour=(191, 164, 9))
+		multi = func.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 - 50), borderColour=(191, 164, 9))
+		settings = func.Button(self, "Settings", x='center', y=(self.screenHeight/2 - 100), borderColour=(191, 164, 9))
+		_quit = func.Button(self, "Quit", x='center', y=(self.screenHeight/2 - 150), borderColour=(191, 164, 9))
 
 		buttons = pg.sprite.Group(single, multi, settings, _quit)
 		run = self.menuLoop(buttons)
@@ -31,20 +33,43 @@ class ClientGame(object):
 
 	def menuLoop(self, buttons):
 		while True:
-			for button in buttons:
+			for button in buttons.sprites():
 				button.hover()
 				if button.clicked():
 					return button
-			buttons.draw()
+				button.draw()
+			pg.display.update()
+			self.clock.tick(30)
 
 	def run(self):
-		state = self.menu()
-		if state == 0:
-			self.singleplayer()
-		elif state == 1:
-			self.multiplayer()
-		elif state == 2: # This is a really bad idea lol dont open settings too many times
-			self.settings()
-			self.run()
-		else:
-			self._quit()
+		while True:
+			state = self.menu()
+			if state == 0:
+				self.singleplayer()
+			elif state == 1:
+				self.multiplayer()
+			elif state == 2: # This is a really bad idea lol dont open settings too many times
+				self.settings()
+			else:
+				self._quit()
+				break # untouched code but oh well
+
+
+	def singleplayer(self):
+		pass
+
+
+	def multiplayer(self):
+		pass
+
+
+	def settings(self):
+		pass
+
+
+	def _quit(self):
+		pg.quit()
+		quit()
+
+if __name__ == '__main__':
+	ClientGame(settings.settings)
