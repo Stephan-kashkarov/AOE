@@ -12,7 +12,6 @@ class Button(pg.sprite.Sprite):
 		if not image:
 			self.text = Text(
 				self.name,
-				pos=(x, y),
 				fontColour=(
 					(255, 255, 255) if not self.hovered else (255, 100, 100)
 				)
@@ -78,9 +77,8 @@ class Button(pg.sprite.Sprite):
 
 
 class Text(pg.sprite.Sprite):
-	def __init__(self, text, pos=(0, 0), font="Times New Roman", fontSize=20, fontColour=(0,0,0)):
+	def __init__(self, text, font="Times New Roman", fontSize=20, fontColour=(0,0,0)):
 		self.text = text
-		self.pos = pos
 		self.font = font
 		self.fontSize = fontSize
 		self.fontColour = fontColour
