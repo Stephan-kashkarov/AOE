@@ -28,6 +28,7 @@ class ClientGame(object):
 
 		buttons = pg.sprite.Group(single, multi, settings, _quit)
 		run = self.menuLoop(buttons)
+		print(buttons.sprites().index(run))
 		return buttons.sprites().index(run)
 
 
