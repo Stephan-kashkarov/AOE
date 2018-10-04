@@ -14,7 +14,7 @@ class ClientGame(object):
 		pg.mixer.init()
 		pg.font.init()
 		self.screen = pg.display.set_mode((self.screenWidth, self.screenHeight))
-		self.screen.fill((0,0,0))
+		self.screen.fill((255,255,255))
 		pg.display.set_caption("AOE Clone")
 		self.clock = pg.time.Clock()
 		self.run()
@@ -22,9 +22,9 @@ class ClientGame(object):
 
 	def menu(self):
 		single = func.Button(self, "Singleplayer", x='center', y=(self.screenHeight/2), borderColour=(191, 164, 9))
-		multi = func.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 - 50), borderColour=(191, 164, 9))
-		settings = func.Button(self, "Settings", x='center', y=(self.screenHeight/2 - 100), borderColour=(191, 164, 9))
-		_quit = func.Button(self, "Quit", x='center', y=(self.screenHeight/2 - 150), borderColour=(191, 164, 9))
+		multi = func.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 + 75), borderColour=(191, 164, 9))
+		settings = func.Button(self, "Settings", x='center', y=(self.screenHeight/2 + 150), borderColour=(191, 164, 9))
+		_quit = func.Button(self, "Quit", x='center', y=(self.screenHeight/2 + 225), borderColour=(191, 164, 9))
 
 		buttons = pg.sprite.Group(single, multi, settings, _quit)
 		run = self.menuLoop(buttons)
@@ -33,6 +33,9 @@ class ClientGame(object):
 
 	def menuLoop(self, buttons):
 		while True:
+			for event in pg.event.get():
+				if event.type == pg.QUIT:
+					self._quit()
 			for button in buttons.sprites():
 				button.hover()
 				if button.clicked():
@@ -44,6 +47,7 @@ class ClientGame(object):
 	def run(self):
 		while True:
 			state = self.menu()
+			print(state)
 			if state == 0:
 				self.singleplayer()
 			elif state == 1:

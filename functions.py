@@ -6,19 +6,19 @@ class Button(pg.sprite.Sprite):
 		self.game = game
 		self.name = name
 		self.size = size
+		self.x = self.calc(0, x)
+		self.y = self.calc(1, y)
 		self.hovered = False
 		if not image:
 			self.text = Text(
 				self.name,
-				pos=self.size,
+				pos=(x, y),
 				fontColour=(
 					(255, 255, 255) if not self.hovered else (255, 100, 100)
 				)
 			)
 		self.image = image
 		self.surface = pg.Surface([size[0], size[1]])
-		self.x = self.calc(0, x)
-		self.y = self.calc(1, y)
 		self.borderColour = borderColour
 		super().__init__()
 		self.rect = self.surface.get_rect()
@@ -26,13 +26,13 @@ class Button(pg.sprite.Sprite):
 
 	def calc(self, axis, originalVal):
 		if originalVal == 'center':
-			originalVal = self.game.screenHeight if axis else self.game.screenWidth
+			originalVal = self.game.screenHeight/2 if axis else self.game.screenWidth/2
 		changeVal = self.size[axis]
-		return originalVal + (changeVal/2)
+		return int(originalVal - (changeVal/2))
 
 
 	def draw(self):
-		pg.draw.rect(
+		self.border = pg.draw.rect(
 				self.game.screen,
 				self.borderColour,
 				pg.Rect(
@@ -46,16 +46,15 @@ class Button(pg.sprite.Sprite):
 		if self.image:
 			self.game.screen.blit(self.image, (self.size - 3))
 		else:
-			pg.draw.rect(
+			self.backdrop = pg.draw.rect(
 				self.game.screen,
 				(0,0,0),
 				pg.Rect(
-					self.x - 3,
-					self.y - 3,
+					self.x + 3,
+					self.y + 3,
 					self.size[0] - 6,
 					self.size[1] - 6
-				),
-				3
+				)
 			)
 			rect = self.text.surface.get_rect()
 			rect.center = (self.game.screenWidth/2, self.game.screenHeight/2)
@@ -65,14 +64,14 @@ class Button(pg.sprite.Sprite):
 	def hover(self):
 		if self.rect.collidepoint(pg.mouse.get_pos()):
 			self.hovered = True
-			print(self.name)
 			self.draw()
 
 
 	def clicked(self):
-		if pg.mouse.get_pressed[0]:
-			self.rect.collidepoint(pg.mouse.get_pos())
-			return True
+		if pg.mouse.get_pressed()[0]:
+			if self.rect.collidepoint(pg.mouse.get_pos()):
+				print(self.name)
+				return True
 		return False
 
 
