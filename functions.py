@@ -22,6 +22,8 @@ class Button(pg.sprite.Sprite):
 		self.borderColour = borderColour
 		super().__init__()
 		self.rect = self.surface.get_rect()
+		self.rect.x = self.x
+		self.rect.y = self.y
 
 
 	def calc(self, axis, originalVal):
@@ -48,7 +50,7 @@ class Button(pg.sprite.Sprite):
 		else:
 			self.backdrop = pg.draw.rect(
 				self.game.screen,
-				(0,0,0),
+				(0,0,0) if not self.hovered else (100,100,100),
 				pg.Rect(
 					self.x + 3,
 					self.y + 3,
@@ -71,7 +73,6 @@ class Button(pg.sprite.Sprite):
 	def clicked(self):
 		if pg.mouse.get_pressed()[0]:
 			if self.rect.collidepoint(pg.mouse.get_pos()):
-				print(self.name)
 				return True
 		return False
 
@@ -86,3 +87,10 @@ class Text(pg.sprite.Sprite):
 		self.font = pg.font.SysFont(font, fontSize)
 		self.surface = self.font.render(self.text, True, self.fontColour)
 		super().__init__()
+
+
+
+def drawText(text, surface, x, y):
+	rect = text.surface.get_rect()
+	rect.center = (x, y)
+	surface.blit(text.surface, rect)

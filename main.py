@@ -21,6 +21,9 @@ class ClientGame(object):
 
 
 	def menu(self):
+		title = func.Text("Age Of Empires", pos=(self.screenWidth/2, self.screenHeight/4), fontSize=80)
+		func.drawText(title, self.screen, self.screenWidth/2, self.screenHeight/4)
+
 		single = func.Button(self, "Singleplayer", x='center', y=(self.screenHeight/2), borderColour=(191, 164, 9))
 		multi = func.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 + 75), borderColour=(191, 164, 9))
 		settings = func.Button(self, "Settings", x='center', y=(self.screenHeight/2 + 150), borderColour=(191, 164, 9))
@@ -47,8 +50,8 @@ class ClientGame(object):
 
 	def run(self):
 		while True:
+			state = False
 			state = self.menu()
-			print(state)
 			if state == 0:
 				self.singleplayer()
 			elif state == 1:
@@ -58,6 +61,7 @@ class ClientGame(object):
 			else:
 				self._quit()
 				break # untouched code but oh well
+			
 
 
 	def singleplayer(self):
