@@ -2,10 +2,11 @@ import pygame as pg
 import random
 import time
 import functions as func
-import settings
+from settings import settings
 
 class ClientGame(object):
 	def __init__(self, settings):
+		self.setting = settings
 		self.screenWidth = settings['width']
 		self.screenHeight = settings['height']
 		self.fps = settings['fps']
@@ -23,7 +24,7 @@ class ClientGame(object):
 	def menu(self):
 		self.screen.fill((255,255,255))
 		title = func.Text("Age Of Empires", fontSize=80)
-		func.drawText(title, self.screen, self.screenWidth/2, self.screenHeight/4)
+		func.drawTextCentered(title, self.screen, self.screenWidth/2, self.screenHeight/4)
 
 		single = func.Button(self, "Singleplayer", x='center', y=(self.screenHeight/2), borderColour=(191, 164, 9))
 		multi = func.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 + 75), borderColour=(191, 164, 9))
@@ -53,15 +54,14 @@ class ClientGame(object):
 			state = False
 			state = self.menu()
 			if state == 0:
-				self.singleplayer()
+				state = self.singleplayer()
 			elif state == 1:
-				self.multiplayer()
-			elif state == 2: # This is a really bad idea lol dont open settings too many times
-				self.settings()
-				print("Settings")
-			else:
+				state = self.multiplayer()
+			elif state == 2:
+				state = self.settings()
+			elif state == 3:
 				self._quit()
-				break # untouched code but oh well
+				break # untouched code but oh well just in case
 			
 
 
@@ -77,35 +77,88 @@ class ClientGame(object):
 		self.screen.fill((230,230,230))
 		
 		title = func.Text("Settings", fontSize=40)
-		func.drawText(title, self.screen, self.screenWidth/2, self.screenHeight/16)
+		func.drawTextCentered(title, self.screen, self.screenWidth/2, self.screenHeight/16)
 
+		''' Main Buttons '''
 		controls = func.Button(self, "Controls", x=self.screenWidth/3, y=self.screenHeight/4, borderColour=(191, 164, 9))
 		game = func.Button(self, "Game", x=self.screenWidth/2, y=self.screenHeight/4, borderColour=(191, 164, 9))
 		system = func.Button(self, "System", x=2*self.screenWidth/3, y=self.screenHeight/4, borderColour=(191, 164, 9))
 		back = func.Button(self, "Back", x="center", y=7*self.screenHeight/8, borderColour=(255, 100, 100))
-		buttons = pg.sprite.Group(controls, game, back, system)
+		mainButtons = pg.sprite.Group(controls, game, system, back)
 
+		''' Control Buttons '''
+		directional = func.Button(self, "Directional", x=self.screenWidth/7, y=12*self.screenHeight/28, borderColour=(200,200,200), hoverColour=(230, 230, 230))
+		misc = func.Button(self, "Miscellaneous", x=self.screenWidth/7, y=15*self.screenHeight/28, borderColour=(200,200,200), hoverColour=(230, 230, 230))
+		controlButtons = pg.sprite.Group(directional, misc)
+
+		pg.draw.rect(
+			self.screen,
+			(200, 200, 200),
+			pg.Rect(
+				self.screenWidth/16,
+				self.screenHeight/3,
+				7*self.screenWidth/8,
+				12*self.screenHeight/28
+			)
+		)
+
+		pg.draw.line(self.screen, (150,150,150), (self.screenWidth/4, 10*self.screenHeight/28), (self.screenWidth/4, 20*self.screenHeight/28), 3)
+
+		state = 0
+		substate = 0
 		while True:
+			self.screen.fill((230,230,230))
+			self.drawSettings(title)
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
 					self._quit()
-			for button in buttons.sprites():
+			for button in mainButtons.sprites():
 				button.hover()
 				button.draw()
-			if controls.clicked():
-				pass
-			elif game.clicked():
-				pass
-			elif system.clicked():
-				pass
-			elif back.clicked():
-				time.sleep(0.5) # to ensure that quit isnt immediately clicked
-				return None
+				if button.clicked():
+					state = mainButtons.sprites().index(button)
+			if state == 0:
+				for button in controlButtons.sprites():
+					button.hover()
+					button.draw()
+					if button.clicked():
+						substate = controlButtons.sprites().index(button)
+				if substate == 0:
+					pass
+				else:
+					pass
+			elif state == 1:
+				pass # game
+			elif state == 2:
+				pass # system
+			elif state == 3:
+				return 0
 			pg.display.update()
+
+	def drawSettings(self, text):
+		func.drawTextCentered(text, self.screen, self.screenWidth/2, self.screenHeight/16)
+		pg.draw.rect(
+			self.screen,
+			(200, 200, 200),
+			pg.Rect(
+				self.screenWidth/16,
+				self.screenHeight/3,
+				7*self.screenWidth/8,
+				12*self.screenHeight/28
+			)
+		)
+		pg.draw.line(self.screen, (150,150,150), (self.screenWidth/4, 10*self.screenHeight/28), (self.screenWidth/4, 20*self.screenHeight/28), 3)
+
+	def updateSettingsObject(self):
+		self.screenWidth = self.setting['width']
+		self.screenHeight = self.setting['height']
+		self.fps = self.setting['fps']
+		self.controls = self.setting['controls']
+
 
 	def _quit(self):
 		pg.quit()
 		quit()
 
 if __name__ == '__main__':
-	ClientGame(settings.settings)
+	ClientGame(settings)

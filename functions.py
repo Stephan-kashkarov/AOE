@@ -2,7 +2,8 @@ import pygame as pg
 
 
 class Button(pg.sprite.Sprite):
-	def __init__(self, game, name, x=0, y=0, borderColour=(0,0,0), size=(150, 50), image=None):
+	def __init__(self, game, name, x=0, y=0, borderColour=(0,0,0), hoverColour=(0,0,0), size=(150, 50), image=None):
+		super().__init__()
 		self.game = game
 		self.name = name
 		self.size = size
@@ -19,7 +20,7 @@ class Button(pg.sprite.Sprite):
 		self.image = image
 		self.surface = pg.Surface([size[0], size[1]])
 		self.borderColour = borderColour
-		super().__init__()
+		self.hoverColour = hoverColour
 		self.rect = self.surface.get_rect()
 		self.rect.x = self.x
 		self.rect.y = self.y
@@ -33,7 +34,7 @@ class Button(pg.sprite.Sprite):
 
 
 	def draw(self):
-		self.border = pg.draw.rect(
+		pg.draw.rect(
 				self.game.screen,
 				self.borderColour,
 				pg.Rect(
@@ -47,9 +48,9 @@ class Button(pg.sprite.Sprite):
 		if self.image:
 			self.game.screen.blit(self.image, (self.size - 3))
 		else:
-			self.backdrop = pg.draw.rect(
+			pg.draw.rect(
 				self.game.screen,
-				(0,0,0) if not self.hovered else (100,100,100),
+				self.hoverColour if not self.hovered else (100,100,100),
 				pg.Rect(
 					self.x + 3,
 					self.y + 3,
@@ -88,7 +89,7 @@ class Text(pg.sprite.Sprite):
 
 
 
-def drawText(text, surface, x, y):
+def drawTextCentered(text, surface, x, y):
 	rect = text.surface.get_rect()
 	rect.center = (x, y)
 	surface.blit(text.surface, rect)
