@@ -1,8 +1,10 @@
 import pygame as pg
 import random
 import time
-import functions as func
-from settings import settings
+import app.menu.textAssets as textAssets
+import app.game.client as client
+import app.functions as func
+from app.settings import settings
 
 class ClientGame(object):
 	def __init__(self, settings):
@@ -23,13 +25,13 @@ class ClientGame(object):
 
 	def menu(self):
 		self.screen.fill((255,255,255))
-		title = func.Text("Age Of Empires", fontSize=80)
+		title = textAssets.Text("Age Of Empires", fontSize=80)
 		func.drawTextCentered(title, self.screen, self.screenWidth/2, self.screenHeight/4)
 
-		single = func.Button(self, "Singleplayer", x='center', y=(self.screenHeight/2), borderColour=(191, 164, 9))
-		multi = func.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 + 75), borderColour=(191, 164, 9))
-		settings = func.Button(self, "Settings", x='center', y=(self.screenHeight/2 + 150), borderColour=(191, 164, 9))
-		_quit = func.Button(self, "Quit", x='center', y=(self.screenHeight/2 + 225), borderColour=(191, 164, 9))
+		single = textAssets.Button(self, "Singleplayer", x='center', y=(self.screenHeight/2), borderColour=(191, 164, 9))
+		multi = textAssets.Button(self, "Multiplayer", x='center', y=(self.screenHeight/2 + 75), borderColour=(191, 164, 9))
+		settings = textAssets.Button(self, "Settings", x='center', y=(self.screenHeight/2 + 150), borderColour=(191, 164, 9))
+		_quit = textAssets.Button(self, "Quit", x='center', y=(self.screenHeight/2 + 225), borderColour=(191, 164, 9))
 
 		buttons = pg.sprite.Group(single, multi, settings, _quit)
 		run = self.menuLoop(buttons)
@@ -66,6 +68,8 @@ class ClientGame(object):
 
 
 	def singleplayer(self):
+		settings = single.Settings(self)
+		single.Match(settings)
 		return 0
 
 
@@ -76,19 +80,19 @@ class ClientGame(object):
 	def settings(self):
 		self.screen.fill((230,230,230))
 		
-		title = func.Text("Settings", fontSize=40)
+		title = textAssets.Text("Settings", fontSize=40)
 		func.drawTextCentered(title, self.screen, self.screenWidth/2, self.screenHeight/16)
 
 		''' Main Buttons '''
-		controls = func.Button(self, "Controls", x=self.screenWidth/3, y=self.screenHeight/4, borderColour=(191, 164, 9))
-		game = func.Button(self, "Game", x=self.screenWidth/2, y=self.screenHeight/4, borderColour=(191, 164, 9))
-		system = func.Button(self, "System", x=2*self.screenWidth/3, y=self.screenHeight/4, borderColour=(191, 164, 9))
-		back = func.Button(self, "Back", x="center", y=7*self.screenHeight/8, borderColour=(255, 100, 100))
+		controls = textAssets.Button(self, "Controls", x=self.screenWidth/3, y=self.screenHeight/4, borderColour=(191, 164, 9))
+		game = textAssets.Button(self, "Game", x=self.screenWidth/2, y=self.screenHeight/4, borderColour=(191, 164, 9))
+		system = textAssets.Button(self, "System", x=2*self.screenWidth/3, y=self.screenHeight/4, borderColour=(191, 164, 9))
+		back = textAssets.Button(self, "Back", x="center", y=7*self.screenHeight/8, borderColour=(255, 100, 100))
 		mainButtons = pg.sprite.Group(controls, game, system, back)
 
 		''' Control Buttons '''
-		directional = func.Button(self, "Directional", x=self.screenWidth/7, y=12*self.screenHeight/28, borderColour=(200,200,200), hoverColour=(230, 230, 230))
-		misc = func.Button(self, "Miscellaneous", x=self.screenWidth/7, y=15*self.screenHeight/28, borderColour=(200,200,200), hoverColour=(230, 230, 230))
+		directional = textAssets.Button(self, "Directional", x=self.screenWidth/7, y=12*self.screenHeight/28, borderColour=(200,200,200), hoverColour=(230, 230, 230))
+		misc = textAssets.Button(self, "Miscellaneous", x=self.screenWidth/7, y=15*self.screenHeight/28, borderColour=(200,200,200), hoverColour=(230, 230, 230))
 		controlButtons = pg.sprite.Group(directional, misc)
 
 		''' Directional movment options generator'''
@@ -98,14 +102,14 @@ class ClientGame(object):
 		i = 0
 		for control in self.setting["controls"].keys():
 			dcontrolLables.append(control)
-			button = func.Button(self, self.setting['controls'][control], borderColour=(230,230,230))
+			button = textAssets.Button(self, pg.key.name(self.setting['controls'][control]), borderColour=(230,230,230))
 			dcontrolEdits.add(button)
-			dControlObjs.append(func.menuObject(control, button))
+			dControlObjs.append(textAssets.menuObject(control, button))
 			i += 1
 
 		'''Misc buttons'''
-		mForward = func.Button(self, ">")
-		mBack = func.Button(self, "<")
+		mForward = textAssets.Button(self, ">")
+		mBack = textAssets.Button(self, "<")
 		miscButtons = pg.sprite.Group(mForward, mBack)
 
 
@@ -176,9 +180,12 @@ class ClientGame(object):
 									key = pg.key.name(key)
 									if key == "escape":
 										break
-									key = "pg.K_" + key.upper()
-									self.setting['controls'][obj.lable.text] = key
-									button.updateText(key)
+									elif len(key) > 1:
+										key = key.upper()
+										key = key.remove(" ")
+									key = "pg.K_" + key
+									self.setting['controls'][obj.lable.text] = eval(key)
+									button.updateText(pg.key.name(eval(key)))
 									button.draw()
 									break
 								pg.event.pump()
