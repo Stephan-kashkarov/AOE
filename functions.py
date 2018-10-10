@@ -59,6 +59,7 @@ class Button(pg.sprite.Sprite):
 				)
 			)
 			rect = self.text.surface.get_rect()
+
 			rect.center = (self.x + (self.size[0]/2), self.y + (self.size[1]/2))
 			self.game.screen.blit(self.text.surface, rect)
 
@@ -76,6 +77,14 @@ class Button(pg.sprite.Sprite):
 				return True
 		return False
 
+	def updateText(self, newText):
+		self.text = Text(
+			newText,
+			fontColour=(
+				(255, 255, 255) if not self.hovered else (255, 100, 100)
+			)
+		)
+
 
 class Text(pg.sprite.Sprite):
 	def __init__(self, text, font="Times New Roman", fontSize=20, fontColour=(0,0,0)):
@@ -88,6 +97,30 @@ class Text(pg.sprite.Sprite):
 		super().__init__()
 
 
+class menuObject(object):
+	def __init__(self, lable, button):
+		self.button = button
+		self.lable = Text(lable)
+		self.rect = pg.Rect(0, 0, 150, 100)
+
+	def set(self, x, y):
+		self.rect.center = (x,y)
+	
+	def calc(self):
+		self.button.x = self.rect.left + (self.rect.width - self.button.size[0])/2
+		self.button.y = self.rect.midleft[1]
+
+	def draw(self):
+		pg.draw.rect(self.button.game.screen, (200, 0, 0), self.rect)
+		self.button.draw()
+		drawTextCentered(self.lable, self.button.game.screen, (self.rect.width/2), (self.rect.height/3))
+
+	def clicked(self):
+		if pg.mouse.get_pressed()[0]:
+			if self.button.rect.collidepoint(pg.mouse.get_pos()):
+				return True
+		else:
+			return False
 
 def drawTextCentered(text, surface, x, y):
 	rect = text.surface.get_rect()

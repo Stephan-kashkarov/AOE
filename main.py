@@ -91,6 +91,24 @@ class ClientGame(object):
 		misc = func.Button(self, "Miscellaneous", x=self.screenWidth/7, y=15*self.screenHeight/28, borderColour=(200,200,200), hoverColour=(230, 230, 230))
 		controlButtons = pg.sprite.Group(directional, misc)
 
+		''' Directional movment options generator'''
+		dcontrolLables = []
+		dcontrolEdits = pg.sprite.Group()
+		dControlObjs = []
+		i = 0
+		for control in self.setting["controls"].keys():
+			dcontrolLables.append(control)
+			button = func.Button(self, self.setting['controls'][control], borderColour=(230,230,230))
+			dcontrolEdits.add(button)
+			dControlObjs.append(func.menuObject(control, button))
+			i += 1
+
+		'''Misc buttons'''
+		mForward = func.Button(self, ">")
+		mBack = func.Button(self, "<")
+		miscButtons = pg.sprite.Group(mForward, mBack)
+
+
 		pg.draw.rect(
 			self.screen,
 			(200, 200, 200),
@@ -124,7 +142,39 @@ class ClientGame(object):
 					if button.clicked():
 						substate = controlButtons.sprites().index(button)
 				if substate == 0:
-					pass
+					sw = self.screenWidth
+					sh = self.screenHeight
+					xPos = [sw/3, sw/2, 2*sw/3, 2*sw/3 - (sw/3 + sw/3)]
+					yPos = [12*sh/28, 15*sh/28, 17*sh/28]
+					i = 0
+					objs = dControlObjs
+					for x in xPos:
+						for y in yPos:
+							if i != len(objs) - 2:
+								objs[i].set(x,y)
+								objs[i].calc()
+								objs[i].draw()
+								i += 1
+								break
+
+					if 12 < len(objs):
+						if i != len(objs) - 1:
+							mForward.draw()
+						if i != 11:
+							mBack.draw()
+					for button in miscButtons.sprites():
+						if button.clicked():
+							print(button.name)
+					for button in dcontrolEdits.sprites():
+						button.draw()
+						if button.clicked():
+							pressed = pg.key.get_pressed()
+							for key, val in pressed.items():
+								if val == True:
+									if key not in [x for x in self.setting['controls'].values()]:
+										self.setting['controls'][button.lable] = str(key)
+										button.button.updateText(str(key))
+										button.draw()
 				else:
 					pass
 			elif state == 1:
