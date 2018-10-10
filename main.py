@@ -66,11 +66,11 @@ class ClientGame(object):
 
 
 	def singleplayer(self):
-		pass
+		return 0
 
 
 	def multiplayer(self):
-		pass
+		return 0
 
 
 	def settings(self):
@@ -144,37 +144,44 @@ class ClientGame(object):
 				if substate == 0:
 					sw = self.screenWidth
 					sh = self.screenHeight
-					xPos = [sw/3, sw/2, 2*sw/3, 2*sw/3 - (sw/3 + sw/3)]
-					yPos = [12*sh/28, 15*sh/28, 17*sh/28]
+					xPos = [sw/3, sw/2, 2*sw/3, 2*sw/3 + abs(sw/2 - 2*sw/3)]
+					yPos = [12*sh/28, 17*sh/28]
 					i = 0
 					objs = dControlObjs
 					for x in xPos:
 						for y in yPos:
-							if i != len(objs) - 2:
+							if i != len(objs):
 								objs[i].set(x,y)
 								objs[i].calc()
 								objs[i].draw()
 								i += 1
-								break
 
-					if 12 < len(objs):
-						if i != len(objs) - 1:
+					if 8 < len(objs):
+						if i != len(objs):
 							mForward.draw()
-						if i != 11:
+						if i != 7:
 							mBack.draw()
 					for button in miscButtons.sprites():
 						if button.clicked():
 							print(button.name)
 					for button in dcontrolEdits.sprites():
 						button.draw()
+						button.hover()
 						if button.clicked():
-							pressed = pg.key.get_pressed()
-							for key, val in pressed.items():
-								if val == True:
-									if key not in [x for x in self.setting['controls'].values()]:
-										self.setting['controls'][button.lable] = str(key)
-										button.button.updateText(str(key))
-										button.draw()
+							while True:
+								pressed = pg.key.get_pressed()
+								key = pressed.index(1) if 1 in pressed else None
+								if key:
+									obj = dControlObjs[dcontrolEdits.sprites().index(button)]
+									key = pg.key.name(key)
+									if key == "escape":
+										break
+									key = "pg.K_" + key.upper()
+									self.setting['controls'][obj.lable.text] = key
+									button.updateText(key)
+									button.draw()
+									break
+								pg.event.pump()
 				else:
 					pass
 			elif state == 1:

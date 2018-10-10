@@ -14,7 +14,7 @@ class Button(pg.sprite.Sprite):
 			self.text = Text(
 				self.name,
 				fontColour=(
-					(255, 255, 255) if not self.hovered else (255, 100, 100)
+					(255, 255, 255)
 				)
 			)
 		self.image = image
@@ -31,6 +31,11 @@ class Button(pg.sprite.Sprite):
 			originalVal = self.game.screenHeight/2 if axis else self.game.screenWidth/2
 		changeVal = self.size[axis]
 		return int(originalVal - (changeVal/2))
+	
+	def calcRect(self):
+		self.rect = self.surface.get_rect()
+		self.rect.x = self.x
+		self.rect.y = self.y
 
 
 	def draw(self):
@@ -93,6 +98,7 @@ class Text(pg.sprite.Sprite):
 		self.fontSize = fontSize
 		self.fontColour = fontColour
 		self.font = pg.font.SysFont(font, fontSize)
+		print(self.text)
 		self.surface = self.font.render(self.text, True, self.fontColour)
 		super().__init__()
 
@@ -109,11 +115,12 @@ class menuObject(object):
 	def calc(self):
 		self.button.x = self.rect.left + (self.rect.width - self.button.size[0])/2
 		self.button.y = self.rect.midleft[1]
+		self.button.calcRect()
 
 	def draw(self):
-		pg.draw.rect(self.button.game.screen, (200, 0, 0), self.rect)
+		pg.draw.rect(self.button.game.screen, (150, 150, 150), self.rect)
 		self.button.draw()
-		drawTextCentered(self.lable, self.button.game.screen, (self.rect.width/2), (self.rect.height/3))
+		drawTextCentered(self.lable, self.button.game.screen, (self.rect.midtop[0]), (self.rect.midleft[1] - 1/4 * self.rect.height))
 
 	def clicked(self):
 		if pg.mouse.get_pressed()[0]:
