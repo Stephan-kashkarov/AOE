@@ -1,3 +1,9 @@
+"""AOE CLONE
+	Written by Stephan Kashkarov 2018
+	This is the main file of AOE Clone
+	it contains the main menu of the game
+"""
+'''Imports'''
 import pygame as pg
 import random
 import time
@@ -6,7 +12,14 @@ import app.game.client as client
 import app.functions as func
 from app.settings import settings
 
-class ClientGame(object):
+class MainMenu(object):
+	"""Main Menu object.
+	
+	This object contains the main menu for the game
+	and links together all the gameplay options and settings
+	
+	param settings a dictionary containing all settings
+	"""
 	def __init__(self, settings):
 		self.setting = settings
 		self.screenWidth = settings['width']
@@ -24,6 +37,7 @@ class ClientGame(object):
 
 
 	def menu(self):
+		"""Initializes the main menu"""
 		self.screen.fill((255,255,255))
 		title = textAssets.Text("Age Of Empires", fontSize=80)
 		func.drawTextCentered(title, self.screen, self.screenWidth/2, self.screenHeight/4)
@@ -39,6 +53,7 @@ class ClientGame(object):
 
 
 	def menuLoop(self, buttons):
+		"""Adds interactivity to the menu"""
 		while True:
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
@@ -52,6 +67,7 @@ class ClientGame(object):
 			self.clock.tick(30)
 
 	def run(self):
+		"""Runs the whole game by operating the menu"""
 		while True:
 			state = False
 			state = self.menu()
@@ -68,18 +84,20 @@ class ClientGame(object):
 
 
 	def singleplayer(self):
-		settings = single.Settings(self)
-		single.Match(settings)
+		"""Creates a singleplayer instance of the game"""
 		return 0
 
 
 	def multiplayer(self):
+		"""Creates a multiplayer instance of the game"""
 		return 0
 
 
 	def settings(self):
-		self.screen.fill((230,230,230))
+		"""Runs the settings for the game"""
 		
+		''' Title and background '''
+		self.screen.fill((230,230,230))
 		title = textAssets.Text("Settings", fontSize=40)
 		func.drawTextCentered(title, self.screen, self.screenWidth/2, self.screenHeight/16)
 
@@ -112,7 +130,7 @@ class ClientGame(object):
 		mBack = textAssets.Button(self, "<")
 		miscButtons = pg.sprite.Group(mForward, mBack)
 
-
+		''' Boundry box '''
 		pg.draw.rect(
 			self.screen,
 			(200, 200, 200),
@@ -123,35 +141,41 @@ class ClientGame(object):
 				12*self.screenHeight/28
 			)
 		)
-
+		''' Dividing line'''
 		pg.draw.line(self.screen, (150,150,150), (self.screenWidth/4, 10*self.screenHeight/28), (self.screenWidth/4, 20*self.screenHeight/28), 3)
 
+
+		''' Settings event loop '''
 		state = 0
 		substate = 0
 		while True:
-			self.screen.fill((230,230,230))
-			self.drawSettings(title)
+			self.screen.fill((230,230,230)) 
+			self.drawSettings(title) # redraws settings
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
 					self._quit()
-			for button in mainButtons.sprites():
+			for button in mainButtons.sprites(): # runs interactivity on main Buttons
 				button.hover()
 				button.draw()
 				if button.clicked():
 					state = mainButtons.sprites().index(button)
-			if state == 0:
-				for button in controlButtons.sprites():
+			if state == 0: # controls
+				for button in controlButtons.sprites(): # runs on sub buttons
 					button.hover()
 					button.draw()
 					if button.clicked():
 						substate = controlButtons.sprites().index(button)
-				if substate == 0:
+				if substate == 0: # directional
+
+					'''Function shortening'''
 					sw = self.screenWidth
 					sh = self.screenHeight
 					xPos = [sw/3, sw/2, 2*sw/3, 2*sw/3 + abs(sw/2 - 2*sw/3)]
 					yPos = [12*sh/28, 17*sh/28]
 					i = 0
 					objs = dControlObjs
+
+					'''Selects grid for item'''
 					for x in xPos:
 						for y in yPos:
 							if i != len(objs):
@@ -160,37 +184,44 @@ class ClientGame(object):
 								objs[i].draw()
 								i += 1
 
+					''' Overflow check '''
 					if 8 < len(objs):
 						if i != len(objs):
 							mForward.draw()
 						if i != 7:
 							mBack.draw()
-					for button in miscButtons.sprites():
+
+					for button in miscButtons.sprites(): # Misc button interactivity
 						if button.clicked():
 							print(button.name)
-					for button in dcontrolEdits.sprites():
+
+
+					for button in dcontrolEdits.sprites(): # control edit buttons interactiviyt
 						button.draw()
 						button.hover()
 						if button.clicked():
 							while True:
-								pressed = pg.key.get_pressed()
-								key = pressed.index(1) if 1 in pressed else None
+								pressed = pg.key.get_pressed() # finds key
+								key = pressed.index(1) if 1 in pressed else None # gets index w/o error if none pressed
 								if key:
-									obj = dControlObjs[dcontrolEdits.sprites().index(button)]
-									key = pg.key.name(key)
-									if key == "escape":
+									obj = dControlObjs[dcontrolEdits.sprites().index(button)] # finds object index to button
+									key = pg.key.name(key) # finds name to key ID
+
+									if key == "escape": # cancles change
 										break
-									elif len(key) > 1:
+
+									elif len(key) > 1: # checks for not letter keys
 										key = key.upper()
 										key = key.remove(" ")
-									key = "pg.K_" + key
-									self.setting['controls'][obj.lable.text] = eval(key)
-									button.updateText(pg.key.name(eval(key)))
-									button.draw()
-									break
-								pg.event.pump()
-				else:
-					pass
+
+									key = "pg.K_" + key # changes key string
+									self.setting['controls'][obj.lable.text] = eval(key) # redefins key in settings
+									button.updateText(pg.key.name(eval(key))) # updates button text
+									button.draw() # redraws button
+									break # exits while loop
+								pg.event.pump() # updates events
+				else: # Misc
+					pass 
 			elif state == 1:
 				pass # game
 			elif state == 2:
@@ -200,6 +231,7 @@ class ClientGame(object):
 			pg.display.update()
 
 	def drawSettings(self, text):
+		'''Draws the settings again'''
 		func.drawTextCentered(text, self.screen, self.screenWidth/2, self.screenHeight/16)
 		pg.draw.rect(
 			self.screen,
@@ -214,6 +246,7 @@ class ClientGame(object):
 		pg.draw.line(self.screen, (150,150,150), (self.screenWidth/4, 10*self.screenHeight/28), (self.screenWidth/4, 20*self.screenHeight/28), 3)
 
 	def updateSettingsObject(self):
+		'''updates settings obj internally'''
 		self.screenWidth = self.setting['width']
 		self.screenHeight = self.setting['height']
 		self.fps = self.setting['fps']
@@ -221,8 +254,9 @@ class ClientGame(object):
 
 
 	def _quit(self):
+		"""Safe quit function"""
 		pg.quit()
 		quit()
 
 if __name__ == '__main__':
-	ClientGame(settings)
+	MainMenu(settings)

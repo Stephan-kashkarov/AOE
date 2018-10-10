@@ -1,4 +1,5 @@
 import pygame as pg
+
 settings = {
 	'width': 1024,
 	'height': 576,
