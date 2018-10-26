@@ -1,5 +1,6 @@
 def generateMap(type, size):
-    pass
+    map = ""
+    return map
 
 def findPoint(location):
     pass
