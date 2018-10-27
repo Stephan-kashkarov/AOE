@@ -88,6 +88,7 @@ def generateMap(biome, size):
 		printSegment(x, y, 5, canvus)
 		x = random.randint(0, size)
 		y = random.randint(0, size)
+		print()
 		resorces -= 1
 
 	xList = [int(size/4), int(3*size/4)]
