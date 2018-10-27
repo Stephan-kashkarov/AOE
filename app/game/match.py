@@ -1,7 +1,11 @@
-import pygame as pg
+import json
 import requests
+
+import pygame as pg
+
 from app.game import maps
 from app.game.assets import starts
+
 
 class options(object):
 	def __init__(self, serverIP, mapType, mapSize, clients, key):
@@ -14,33 +18,53 @@ class Match(object):
 	def __init__(self, options):
 		self.serverIP = options.serverIP
 		self.map = maps.generateMap(options.mapType, options.mapSize)
-		self.units = {}
-		for i in range(3):
+		self.units = self.getUnits()
+		for id in self.units["keys"]:
 			self.units[id] = starts.default
-			maps.createSpawns(i)
-		self.orders = ()
+		maps.createSpawns(self.units)
+		self.sendUnits()
+		self.sendMap()
+		self.events = ()
 		self.key = options.key
 
-	def getOrders(self):
-		self.orders += (requests.get(self.serverIP + "/getOrders") - self.orders)
 
-	def executeOrders(self):
-		for order in self.orders:
-			run = self.orders.pop(order)
-			run.excecute()
-			if not run.complete:
-				self.orders.insert(0, run)
+	# Unit Processing
+	def getUnits(self):
+		return requests.get(self.serverIP + '/units/get')
 
-	def renderMap(self):
-		map = self.map
-		return map
+	def sendUnits(self):
+		requests.post(
+			self.serverIP + '/units/set',
+			json=json.dumps({
+				'key':self.key,
+				'units': self.units
+			})
+		)
 
+	# Map Processing
 	def sendMap(self):
-		response = requests.post(self.serverIP + "/map/set", json={'key': self.key, 'map': self.map})
-		print("Broadcast status", response.status_code, response.reason)
+		requests.post(self.serverIP + "/map/set",
+		json=json.dumps({
+			'key':self.key,
+			'map': self.map
+		}))
+
+	# Event processing
+	def getEvents(self):
+		self.events += (requests.get(self.serverIP + '/events/get') - self.events)
+
+	def executeEvents(self):
+		events = []
+		for event in [x for x in self.events[::-1]]:
+			event = self.events.pop(event)
+			event.step()
+			if not event.complete:
+				events.append(event)
+		self.events = events
 
 	def run(self):
-		self.getOrders()
-		self.executeOrders()
-		self.map = self.renderMap()
-		self.sendMap()
+		while True:
+			self.sendUnits()
+			self.getEvents()
+			if self.executeEvents() == False:
+				break

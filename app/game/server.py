@@ -104,7 +104,6 @@ class Server(object):
 			return True
 		return False
 
-
 	def addUnits(self):
 		data = json.loads(request.json)
 		print("Json Recieved: {}".format(data))
