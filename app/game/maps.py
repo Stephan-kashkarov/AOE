@@ -102,6 +102,7 @@ def generateMap(biome, size):
 	
 	return canvus
 
+
 def createSpawns(client):
 	pass
 

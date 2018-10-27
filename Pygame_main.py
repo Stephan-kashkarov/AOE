@@ -4,13 +4,20 @@
 	it contains the main menu of the game
 """
 '''Imports'''
-import pygame as pg
 import random
+import threading
 import time
-import app.menu.textAssets as textAssets
-import app.game.client as client
+
+import pygame as pg
+
 import app.functions as func
+import app.game.ai as ai
+import app.game.client as client
+import app.game.match as match
+import app.game.server as server
+import app.menu.textAssets as textAssets
 from app.settings import settings
+
 
 class MainMenu(object):
 	"""Main Menu object.
@@ -84,7 +91,34 @@ class MainMenu(object):
 
 
 	def singleplayer(self):
-		"""Creates a singleplayer instance of the game"""
+
+		# Making game objects
+		options = match.options(
+			'127.0.0.1:5000',
+			'forrest',
+			2000,
+			clients,
+			'singleplayer'
+		)
+		player1 = client.PlayerClient(options.serverIP)
+		player2 = ai.Ai(options.serverIP)
+		game = match.Match(options)
+		host = server.Server(game)
+		
+		
+		# Making Threads
+		gameThread = threading.Thread(target=game.run())
+		serverThread = threading.Thread(target=host.run())
+		aiThread = threading.Thread(target=player2.run())
+		# Starting Threads
+		gameThread.start()
+		serverThread.start()
+		aiThread.start()
+		# Running Threads
+		gameThread.run()
+		serverThread.run()
+		aiThread.run()
+		player1.run()
 		return 0
 
 

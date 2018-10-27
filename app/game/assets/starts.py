@@ -1,2 +1,1 @@
-def default(nation):
-    return []
+default = ()
