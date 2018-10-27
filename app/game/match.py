@@ -11,6 +11,7 @@ class Match(object):
         self.units = {}
         for client in self.clients:
             self.units[client.id] = starts.default(client.nation)
+            maps.createSpawns(client)
         self.orders = ()
         self.key = options.key
 

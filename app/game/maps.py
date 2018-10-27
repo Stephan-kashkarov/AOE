@@ -10,9 +10,9 @@ def generateMap(biome, size):
 
 	# defines map types
 	if biome == "forrest":
-		trees = (40*size/100)
+		trees = (80*size/100)
 		water = (30*size/100)
-		resorces = (20*size/100)
+		resorces = (30*size/100)
 	elif biome == "desert":
 		trees = (20*size/100)
 		water = 0
@@ -62,19 +62,47 @@ def generateMap(biome, size):
 		x = random.randint(0, size)
 		y = random.randint(0, size)
 		forrests -= 1
-	print(trees)
 	while trees:
 		x = random.randint(0, len(canvus[0]))
 		y = random.randint(0, len(canvus))
 		if y < len(canvus) and x < len(canvus[j]):
 			canvus[y][x] = 2
 		trees -= 1
+
+	while resorces:
+		for i in range(8):
+			if y < len(canvus) and x < len(canvus[j]):
+				if random.randint(1, 4) == 4:
+					canvus[y][x] = 4
+				else:
+					canvus[y][x] = 3
+			while xChange == 0 and yChange == 0:
+				xChange = random.randint(-1, 1)
+				yChange = random.randint(-1, 1)
+			x += xChange
+			y += yChange
+			xChange = 0
+			yChange = 0
+		print("New resource!")
+		print(x, y)
+		printSegment(x, y, 5, canvus)
+		x = random.randint(0, size)
+		y = random.randint(0, size)
+		resorces -= 1
+
+	xList = [int(size/4), int(3*size/4)]
+	yList = [int(size/4), int(3*size/4)]
+	for x in xList:
+		for y in yList:
+			print("New SpawnPoint made!")
+			for i in range(30):
+				for j in range(30):
+					canvus[y+10-i][x+10-j] = 9
+			printSegment(x, y, 30, canvus)
+	
 	return canvus
 
-def findPoint(location):
-	pass
-
-def choosePoint(point, player, map):
+def createSpawns(client):
 	pass
 
 def printSegment(x, y, size, canvus):
