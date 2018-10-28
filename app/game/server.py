@@ -1,6 +1,7 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, make_response
 from flask_socketio import send, emit
 import json
+import time
 
 # parts of this code where found 
 # on stackoverflow:
@@ -11,19 +12,20 @@ class EndpointAction(object):
 
 	def __init__(self, action):
 		self.action = action
-		self.response = Response(status=200, headers={})
+		self.response = ""
 
 	def __call__(self, *args):
-		self.action()
+		self.response = make_response(self.action())
 		return self.response
 
 class Server(object):
-	def __init__(self, _map):
+	def __init__(self, _map, key):
 		#server stuff
 		self.name = "Game Server"
 		self.app = Flask(self.name)
 		
 		#Game stuff
+		self.gameOver = False
 		self.map = _map
 		self.units = {
 			'keys': [0, 1, 2, 3],
@@ -44,8 +46,8 @@ class Server(object):
 				'units': ()
 			}
 		}
-		self.events = []
-		self.key = 'Dev-key'
+		self.events = set({})
+		self.key = key
 		
 		# Endpoints
 		self.add_endpoint(
@@ -98,37 +100,32 @@ class Server(object):
 	# set routes
 	def setMap(self):
 		data = json.loads(request.json)
-		print("Json Recieved: {}".format(data))
 		if data['key'] == self.key:
 			self.map = data['map']
-			return True
-		return False
+			return 'True'
+		return 'False'
 
 	def addUnits(self):
 		data = json.loads(request.json)
-		print("Json Recieved: {}".format(data))
 		if data['key'] == self.key:
-			for i in range(0, 3):
+			for i in self.units['keys']:
 				self.units[i]['units'] += data['units'][i]
-			return True
-		return False
+			return 'True'
+		return 'False'
 
 	def setUnits(self):
 		data = json.loads(request.json)
-		print("Json Recieved: {}".format(data))
 		if data['key'] == self.key:
-			for i in range(0, 3):
-				self.units = data['units']
-			return True
-		return False
+			self.units = data['units']
+			return 'True'
+		return 'False'
 
 	def addEvents(self):
 		data = json.loads(request.json)
-		print("Json Recieved: {}".format(data))
 		if data['key'] == self.key:
 			self.events += data['events']
-			return True
-		return False
+			return 'True'
+		return 'False'
 
 	# get routes
 	def getMap(self):
@@ -138,16 +135,12 @@ class Server(object):
 		return json.dumps(self.units)
 
 	def getEvents(self):
-		return json.dumps(self.events)
+		return json.dumps(list(self.events))
 
-
-	# Misc routes
 	def run(self):
 		self.app.run()
 
 	def test(self):
-		if request:
-			print(dir(request))
 		return "Hell0!"
 
 	def add_endpoint(self, endpoint=None, endpoint_name=None, handler=None, _methods=None):

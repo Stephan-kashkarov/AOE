@@ -6,15 +6,17 @@
 '''Imports'''
 import random
 import threading
+import multiprocessing
 import time
 
 import pygame as pg
 
-import app.functions as func
 import app.game.ai as ai
-import app.game.client as client
+import app.game.maps as maps
+import app.functions as func
 import app.game.match as match
 import app.game.server as server
+import app.game.client as client
 import app.menu.textAssets as textAssets
 from app.settings import settings
 
@@ -96,29 +98,33 @@ class MainMenu(object):
 		options = match.options(
 			'127.0.0.1:5000',
 			'forrest',
-			2000,
-			clients,
+			1000,
 			'singleplayer'
 		)
 		player1 = client.PlayerClient(options.serverIP)
 		player2 = ai.Ai(options.serverIP)
-		game = match.Match(options)
-		host = server.Server(game)
-		
-		
+
+		_map = maps.generateMap(options.mapType, options.mapSize)
+		host = server.Server(_map, options.key)
+		server_ = multiprocessing.Process(target=host.run)
+		server_.start()
+		# allow for the server to initializse
+		time.sleep(1)
+		game = match.Match(options, _map)
+
 		# Making Threads
-		gameThread = threading.Thread(target=game.run())
-		serverThread = threading.Thread(target=host.run())
-		aiThread = threading.Thread(target=player2.run())
+		gameThread = threading.Thread(target=game.run)
+		aiThread = threading.Thread(target=player2.run)
 		# Starting Threads
 		gameThread.start()
-		serverThread.start()
 		aiThread.start()
-		# Running Threads
-		gameThread.run()
-		serverThread.run()
-		aiThread.run()
+		# Running clientside
 		player1.run()
+		# Joining of threads
+		server_.terminate()
+		server_.join()
+		gameThread.join()
+		aiThread.join()
 		return 0
 
 

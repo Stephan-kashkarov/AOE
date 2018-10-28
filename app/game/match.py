@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 
@@ -8,33 +9,33 @@ from app.game.assets import starts
 
 
 class options(object):
-	def __init__(self, serverIP, mapType, mapSize, clients, key):
+	def __init__(self, serverIP, mapType, mapSize, key):
 		self.serverIP = serverIP
 		self.mapType = mapType
 		self.mapSize = mapSize
 		self.key = key
 
 class Match(object):
-	def __init__(self, options):
-		self.serverIP = options.serverIP
-		self.map = maps.generateMap(options.mapType, options.mapSize)
+	def __init__(self, options, _map):
+		self.serverIP = 'http://' + options.serverIP
+		self.map = _map
+		self.events = []
+		self.key = options.key
 		self.units = self.getUnits()
-		for id in self.units["keys"]:
+		for id in self.units['keys']:
 			self.units[id] = starts.default
 		maps.createSpawns(self.units)
 		self.sendUnits()
 		self.sendMap()
-		self.events = ()
-		self.key = options.key
 
 
 	# Unit Processing
 	def getUnits(self):
-		return requests.get(self.serverIP + '/units/get')
+		return requests.get(str(self.serverIP + '/units/get')).json()
 
 	def sendUnits(self):
 		requests.post(
-			self.serverIP + '/units/set',
+			str(self.serverIP + '/units/set'),
 			json=json.dumps({
 				'key':self.key,
 				'units': self.units
@@ -43,7 +44,7 @@ class Match(object):
 
 	# Map Processing
 	def sendMap(self):
-		requests.post(self.serverIP + "/map/set",
+		requests.post(str(self.serverIP + '/map/set'),
 		json=json.dumps({
 			'key':self.key,
 			'map': self.map
@@ -51,7 +52,9 @@ class Match(object):
 
 	# Event processing
 	def getEvents(self):
-		self.events += (requests.get(self.serverIP + '/events/get') - self.events)
+		request = requests.get(str(self.serverIP + '/events/get'))
+		for event in list(set(request.json()) - set(self.events)):
+			self.events.append(event)
 
 	def executeEvents(self):
 		events = []
@@ -62,9 +65,17 @@ class Match(object):
 				events.append(event)
 		self.events = events
 
+	def checkWin(self):
+		for i in self.units['keys']:
+			if not len(self.units[i]['units']):
+				return True
+		return False
+
 	def run(self):
 		while True:
+			print('Game: tick')
 			self.sendUnits()
 			self.getEvents()
-			if self.executeEvents() == False:
+			self.executeEvents()
+			if self.checkWin() == True:
 				break

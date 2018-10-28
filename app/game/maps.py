@@ -70,7 +70,7 @@ def generateMap(biome, size):
 		trees -= 1
 
 	while resorces:
-		for i in range(8):
+		for i in range(12):
 			if y < len(canvus) and x < len(canvus[j]):
 				if random.randint(1, 4) == 4:
 					canvus[y][x] = 4
