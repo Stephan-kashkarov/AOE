@@ -66,8 +66,10 @@ class Match(object):
 		self.events = events
 
 	def checkWin(self):
+		print(self.units)
 		for i in self.units['keys']:
-			if not len(self.units[i]['units']):
+			if not len(self.units[str(i)]['units']):
+				print("Match: Game Over!")
 				return True
 		return False
 

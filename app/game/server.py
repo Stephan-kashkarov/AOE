@@ -150,5 +150,5 @@ class Server(object):
 
 # Testing 
 if __name__ == '__main__':
-	s = Server(None)
+	s = Server(None, None)
 	s.run()
