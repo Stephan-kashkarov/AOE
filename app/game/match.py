@@ -23,7 +23,7 @@ class Match(object):
 		self.key = options.key
 		self.units = self.getUnits()
 		for id in self.units['keys']:
-			self.units[id] = starts.default
+			self.units[str(id)]['units'] = starts.default
 		maps.createSpawns(self.units)
 		self.sendUnits()
 		self.sendMap()
@@ -66,9 +66,9 @@ class Match(object):
 		self.events = events
 
 	def checkWin(self):
-		print(self.units)
+		win = bool(requests.post(self.serverIP + '/game/over'))
 		for i in self.units['keys']:
-			if not len(self.units[str(i)]['units']):
+			if not len(self.units[str(i)]['units']) or win:
 				print("Match: Game Over!")
 				return True
 		return False
@@ -76,8 +76,9 @@ class Match(object):
 	def run(self):
 		while True:
 			print('Game: tick')
-			self.sendUnits()
+			self.units = self.getUnits()
 			self.getEvents()
 			self.executeEvents()
+			self.sendUnits()
 			if self.checkWin() == True:
 				break

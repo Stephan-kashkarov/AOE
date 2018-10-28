@@ -8,6 +8,7 @@ import random
 import threading
 import multiprocessing
 import time
+import os
 
 import pygame as pg
 
@@ -93,7 +94,7 @@ class MainMenu(object):
 
 
 	def singleplayer(self):
-
+		self.loadingScreen()
 		# Making game objects
 		options = match.options(
 			'127.0.0.1:5000',
@@ -121,10 +122,23 @@ class MainMenu(object):
 		# Running clientside
 		player1.run()
 		# Joining of threads
-		server_.terminate()
-		server_.join()
 		gameThread.join()
+		print("Main: is game thread alive? {}".format(gameThread.is_alive()))
 		aiThread.join()
+		print("Main: is ai thread alive? {}".format(aiThread.is_alive()))
+		print("Main: is server process alive? {}".format(server_.is_alive()))
+		server_.terminate()
+		if server_.is_alive():
+			print('server Terminate failed')
+		server_.join(2)
+		if server_.is_alive():
+			print('server Join timed out')
+		os.system('kill -9 {}'.format(server_.pid))
+		if server_.is_alive():
+			print('server os kill failed')
+		print("Main: is server process alive? {}".format(server_.is_alive()))
+		if not server_.is_alive():
+			print("YOU DID IT!!")
 		return 0
 
 
@@ -291,6 +305,12 @@ class MainMenu(object):
 		self.screenHeight = self.setting['height']
 		self.fps = self.setting['fps']
 		self.controls = self.setting['controls']
+	
+	def loadingScreen(self):
+		self.screen.fill((0, 0, 0))
+		text = textAssets.Text("Loading...", fontSize=50, fontColour=(255,255,255))
+		func.drawTextCentered(text, self.screen, self.screenWidth/2, self.screenHeight/2)
+		pg.display.update()
 
 
 	def _quit(self):

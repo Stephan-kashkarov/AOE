@@ -25,7 +25,7 @@ class Server(object):
 		self.app = Flask(self.name)
 		
 		#Game stuff
-		self.gameOver = False
+		self.gameState = False
 		self.map = _map
 		self.units = {
 			'keys': [0, 1, 2, 3],
@@ -46,7 +46,7 @@ class Server(object):
 				'units': ()
 			}
 		}
-		self.events = set({})
+		self.events = []
 		self.key = key
 		
 		# Endpoints
@@ -94,6 +94,11 @@ class Server(object):
 			handler=self.addEvents,
 			_methods=['POST']
 		)
+		self.add_endpoint(
+			endpoint='/game/over',
+			endpoint_name='gameOver',
+			handler=self.gameOver
+		)
 
 	# Game Routes
 
@@ -109,7 +114,7 @@ class Server(object):
 		data = json.loads(request.json)
 		if data['key'] == self.key:
 			for i in self.units['keys']:
-				self.units[i]['units'] += data['units'][i]
+				self.units[str(i)]['units'].append(set(data[str(i)]['units']) - set(self.units[str(i)]['units']))
 			return 'True'
 		return 'False'
 
@@ -123,7 +128,7 @@ class Server(object):
 	def addEvents(self):
 		data = json.loads(request.json)
 		if data['key'] == self.key:
-			self.events += data['events']
+			self.events.append(data['events'])
 			return 'True'
 		return 'False'
 
@@ -137,11 +142,16 @@ class Server(object):
 	def getEvents(self):
 		return json.dumps(list(self.events))
 
+	
+	# Misc routes
 	def run(self):
 		self.app.run()
 
+	def gameOver(self):
+		return str(self.gameOver)
+
 	def test(self):
-		return "Hell0!"
+		return "<title>Hell0!</title>"
 
 	def add_endpoint(self, endpoint=None, endpoint_name=None, handler=None, _methods=None):
 		self.app.add_url_rule(endpoint, endpoint_name, EndpointAction(handler), methods=_methods)
