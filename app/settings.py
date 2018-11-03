@@ -1,8 +1,8 @@
 import pygame as pg
 
 settings = {
-	'width': 1024,
-	'height': 576,
+	'width': 1600,
+	'height': 900,
 	'fps': 120,
 	'controls': {
 		'up': pg.K_w,

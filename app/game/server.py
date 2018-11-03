@@ -30,18 +30,22 @@ class Server(object):
 		self.units = {
 			'keys': [0, 1, 2, 3],
 			0: {
+				'resouces': {},
 				'alive': False,
 				'units': ()
 			},
 			1: {
+				'resouces': {},
 				'alive': False,
 				'units': ()
 			},
 			2: {
+				'resouces': {},
 				'alive': False,
 				'units': ()
 			},
 			3: {
+				'resouces': {},
 				'alive': False,
 				'units': ()
 			}

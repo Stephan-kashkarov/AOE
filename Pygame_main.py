@@ -4,11 +4,11 @@
 	it contains the main menu of the game
 """
 '''Imports'''
+import os
+import time
 import random
 import threading
 import multiprocessing
-import time
-import os
 
 import pygame as pg
 
@@ -16,10 +16,10 @@ import app.game.ai as ai
 import app.game.maps as maps
 import app.functions as func
 import app.game.match as match
-import app.game.server as server
 import app.game.client as client
-import app.menu.textAssets as textAssets
+import app.game.server as server
 from app.settings import settings
+import app.menu.textAssets as textAssets
 
 
 class MainMenu(object):
@@ -94,7 +94,7 @@ class MainMenu(object):
 
 
 	def singleplayer(self):
-		self.loadingScreen()
+		self.loadingScreen("Loading...")
 		# Making game objects
 		options = match.options(
 			'127.0.0.1:5000',
@@ -102,7 +102,7 @@ class MainMenu(object):
 			1000,
 			'singleplayer'
 		)
-		player1 = client.PlayerClient(options.serverIP)
+		player1 = client.PlayerClient(options.serverIP, self.screen)
 		player2 = ai.Ai(options.serverIP)
 
 		_map = maps.generateMap(options.mapType, options.mapSize)
@@ -120,25 +120,17 @@ class MainMenu(object):
 		gameThread.start()
 		aiThread.start()
 		# Running clientside
-		player1.run()
+		state = player1.run()
 		# Joining of threads
+		self.loadingScreen('Game Over!')
 		gameThread.join()
-		print("Main: is game thread alive? {}".format(gameThread.is_alive()))
 		aiThread.join()
-		print("Main: is ai thread alive? {}".format(aiThread.is_alive()))
-		print("Main: is server process alive? {}".format(server_.is_alive()))
 		server_.terminate()
-		if server_.is_alive():
-			print('server Terminate failed')
-		server_.join(2)
-		if server_.is_alive():
-			print('server Join timed out')
-		os.system('kill -9 {}'.format(server_.pid))
-		if server_.is_alive():
-			print('server os kill failed')
-		print("Main: is server process alive? {}".format(server_.is_alive()))
-		if not server_.is_alive():
-			print("YOU DID IT!!")
+		server_.join(5)
+		time.sleep(1)
+		if state == 'quit':
+			self._quit()
+			quit()
 		return 0
 
 
@@ -306,9 +298,9 @@ class MainMenu(object):
 		self.fps = self.setting['fps']
 		self.controls = self.setting['controls']
 	
-	def loadingScreen(self):
+	def loadingScreen(self, text):
 		self.screen.fill((0, 0, 0))
-		text = textAssets.Text("Loading...", fontSize=50, fontColour=(255,255,255))
+		text = textAssets.Text(text, fontSize=50, fontColour=(255,255,255))
 		func.drawTextCentered(text, self.screen, self.screenWidth/2, self.screenHeight/2)
 		pg.display.update()
 
