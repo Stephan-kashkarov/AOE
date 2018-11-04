@@ -47,8 +47,6 @@ class PlayerClient(object):
 				self.screenHeight/20
 			)
 		)
-		
-		
 	
 	def getCommands(self):
 		for event in pg.event.get():

@@ -16,7 +16,7 @@ import app.game.ai as ai
 import app.game.maps as maps
 import app.functions as func
 import app.game.match as match
-import app.game.client as client
+import app.game.client.clientMain as client
 import app.game.server as server
 from app.settings import settings
 import app.menu.textAssets as textAssets
