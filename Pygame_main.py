@@ -102,7 +102,7 @@ class MainMenu(object):
 			1000,
 			'singleplayer'
 		)
-		player1 = client.PlayerClient(options.serverIP, self.screen)
+		player1 = client.PlayerClient(options.serverIP, self.screen, self)
 		player2 = ai.Ai(options.serverIP)
 
 		_map = maps.generateMap(options.mapType, options.mapSize)
